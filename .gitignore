@@ -1,0 +1,5 @@
+composer.lock
+.docker
+vendor
+.env
+.idea
