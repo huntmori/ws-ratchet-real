@@ -1,5 +1,6 @@
 composer.lock
 .docker
+docker
 vendor
 .env
 .idea
