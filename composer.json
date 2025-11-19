@@ -1,0 +1,16 @@
+{
+  "require": {
+    "php": "^8.4",
+    "cboden/ratchet": "^0.4.4",
+    "monolog/monolog": "^3.9",
+    "predis/predis": "^3.2",
+    "vlucas/phpdotenv": "^5.6",
+    "catfan/medoo": "^2.2",
+    "php-di/php-di": "^7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  }
+}

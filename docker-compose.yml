@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  # PHP Application Container
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws-app-real-php
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - "${APP_PORT}:8888"  # WebSocket server port
+    volumes:
+      - ./public:/app/public
+      - ./src:/app/src
+      - ./.env:/app/.env
+    working_dir: /app
+    command: php public/server.php
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # MariaDB Container
+  mariadb:
+    image: mariadb:11
+    container_name: ws-app-real-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE}
+    ports:
+      - "${MARIADB_HOST_PORT}:3306"
+    volumes:
+      - ./docker/ws-app-real-mariadb:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command:
+      - --bind-address=0.0.0.0
+      - --port=3306
+      - --skip-name-resolve
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Redis Container
+  redis:
+    image: redis:7-alpine
+    container_name: ws-app-real-redis
+    command: ["redis-server", "--appendonly", "yes", "--bind", "0.0.0.0"]
+    ports:
+      - "${REDIS_HOST_PORT}:6379"
+    volumes:
+      - ./docker/ws-app-real-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
