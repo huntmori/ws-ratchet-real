@@ -13,9 +13,12 @@ class ChatController implements MessageComponentInterface
     /** @var array<int, ConnectionPair> $connections */
     private array $connections = [];
     private ?LoggerInterface $logger = null;
+
+    private ?RequestDispatcher $dispatcher = null;
     public function __construct(ContainerInterface $c)
     {
         $this->logger = $c->get(LoggerInterface::class);
+        $this->dispatcher = $c->get(RequestDispatcher::class);
     }
 
     function onOpen(ConnectionInterface $conn): void

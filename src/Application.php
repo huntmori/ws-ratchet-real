@@ -54,7 +54,7 @@ class Application
         if($redis->info()) {
             $logger->info('redis client 초기화 완료');
         }
-
+        $containerBuilder->useAutowiring(true);
         $this->container = $containerBuilder->build();
 
         $app = $this->setRatchet();
