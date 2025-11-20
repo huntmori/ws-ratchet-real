@@ -63,4 +63,17 @@ class UserRepository extends BaseRepository
             ]
         );
     }
+
+    public function getOneById(string $id): ?User
+    {
+        $result = $this->medoo->get(
+            'user',
+            '*',
+            ['id' => $id]
+        );
+
+        $this->logger->info('get of \'user\' table is ', $result);
+
+        return User::fromJson($result);
+    }
 }

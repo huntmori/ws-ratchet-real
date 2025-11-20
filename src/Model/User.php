@@ -7,6 +7,12 @@ use App\Attribute\ToArrayKey;
 use App\Trait\ArraySerializable;
 use App\Trait\Buildable;
 
+/**
+ * @method User id(string $id):
+ * @method User uuid(string $uuid)
+ * @method User password(string $password)
+ * @method User createdAt(\DateTime $createdAt)
+ */
 class User
 {
     use Buildable,

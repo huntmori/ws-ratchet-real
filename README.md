@@ -59,8 +59,8 @@ UserCreate
 User Login
 ```JSON
 {
-  "command": "user_login",
-  "data": {
+  "event_name": "user.login",
+  "payload": {
     "id": "kknd",
     "password": "1q2w3e"
   }

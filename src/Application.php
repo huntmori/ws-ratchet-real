@@ -59,8 +59,10 @@ class Application
 
         $containerBuilder->useAutowiring(true);
         $this->container = $containerBuilder->build();
+        $app = $this->setRatchet();
 
-        $app = $this->setRatchet($containerBuilder);
+        $logger->info("WebSocket server started on 0.0.0.0:8888");
+
 
         return $this;
     }
@@ -124,9 +126,27 @@ class Application
 
     }
 
-    private function setRatchet(ContainerBuilder $builder): App
+    private function setRatchet(): App
+    {
+        $chat = $this->container->get(ChatController::class);
+        $chat->registerDispatchers();
+
+        $app = new \Ratchet\App('localhost', 8888, '0.0.0.0', $this->eventLoop);
+        $app->route('/chat', $chat, array('*'));
+
+        $this->app = $app;
+        return $this->app;
+    }
+
+    public function run(): void
     {
         $logger =  $this->container->get(LoggerInterface::class);
+        $this->eventLoop->addPeriodicTimer(60, function() {
+            /** @var LoggerInterface $logger */
+            $logger = $this->container->get(LoggerInterface::class);
+
+            $logger->info('connections : ', $this->container->get(ChatController::class)->connections);
+        });
         $logger->info('Ratchet 서버 초기화', [
             'host' => $this->host,
             'port' => $this->port
@@ -135,21 +155,6 @@ class Application
         $logger->info('eventLoop ? ', [
             spl_object_id($this->eventLoop)
         ]);
-
-        $chat = new ChatController($this->container);
-
-        $chat->registerDispatchers();
-
-        $app = new \Ratchet\App('localhost', 8888, '0.0.0.0', $this->eventLoop);
-        $app->route('/chat', $chat, array('*'));
-
-        $logger->info("WebSocket server started on 0.0.0.0:8888");
-        $this->app = $app;
-        return $this->app;
-    }
-
-    public function run(): void
-    {
         $this->app->run();
     }
 }

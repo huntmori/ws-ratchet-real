@@ -6,7 +6,13 @@ use App\Trait\Buildable;
 use App\Trait\ArraySerializable;
 
 /**
- * @method success(bool $true)
+ * @method BaseResponse success(bool $success)
+ * @method BaseResponse eventName(string $eventName)
+ * @method BaseResponse message(string $message)
+ * @method BaseResponse data(mixed $data)
+ * @method BaseResponse code(int $code)
+ * @method BaseResponse error(?string $error)
+ * @method BaseResponse errorDescription(?string $errorDescription)
  */
 class BaseResponse
 {

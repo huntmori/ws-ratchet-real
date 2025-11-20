@@ -4,12 +4,13 @@ namespace App\Controller;
 
 use App\ConnectionPair;
 use App\Controller\User\UserCreateHandler;
+use App\Controller\User\UserLoginHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 
-class ChatController implements MessageComponentInterface
+final class ChatController implements MessageComponentInterface
 {
     /** @var array<int, ConnectionPair> $connections */
     public array $connections = [];
@@ -20,11 +21,11 @@ class ChatController implements MessageComponentInterface
 
     private ?RequestDispatcher $dispatcher = null;
     private ?ContainerInterface $container = null;
-    public function __construct(ContainerInterface $c)
+    public function __construct(ContainerInterface $c, LoggerInterface $logger, RequestDispatcher $dispatcher)
     {
-        $this->logger = $c->get(LoggerInterface::class);
-        $this->dispatcher = $c->get(RequestDispatcher::class);
+        $this->logger = $logger;
         $this->container = $c;
+        $this->dispatcher = $dispatcher;
     }
 
     function onOpen(ConnectionInterface $conn): void
@@ -104,6 +105,9 @@ class ChatController implements MessageComponentInterface
     {
         $this->dispatcher->registerHandler(
             $this->container->get(UserCreateHandler::class)
+        );
+        $this->dispatcher->registerHandler(
+            $this->container->get(UserLoginHandler::class)
         );
 
         return $this;

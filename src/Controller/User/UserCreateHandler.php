@@ -31,6 +31,9 @@ class UserCreateHandler implements RequestHandlerInterface
     }
 
 
+    /**
+     * @throws ApiException
+     */
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
         // TODO: Implement handle() method.
@@ -39,8 +42,8 @@ class UserCreateHandler implements RequestHandlerInterface
         $baseRequest = BaseRequest::fromJson($data);
         $baseRequest->payload = UserCreatePayload::fromJson($decoded['payload']);
         $this->logger->info("Event [{$baseRequest->eventName}] 's payload : ", $baseRequest->payload->toArray());
-        // TODO:유효성 검사
 
+        // TODO:유효성 검사
         $exists = $this->repository->existsById($baseRequest->payload->id);
         if($exists) {
             throw new ApiException(
