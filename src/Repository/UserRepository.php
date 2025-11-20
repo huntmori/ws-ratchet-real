@@ -42,7 +42,7 @@ class UserRepository extends BaseRepository
                 'id' => $user->id,
                 'password' => $user->password,
                 'uuid' => $user->uuid ?: Medoo::raw('UUID()'),
-                'created_at' => $user->createdAt === null ?: Medoo::raw('now()')
+                'created_at' => $user->createdAt ?: Medoo::raw('now()')
             ]
         );
         $idx = (int)$this->medoo->pdo->lastInsertId();
