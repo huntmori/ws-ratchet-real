@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\ConnectionPair;
+use App\Controller\User\UserCreateHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
@@ -12,6 +13,9 @@ class ChatController implements MessageComponentInterface
 {
     /** @var array<int, ConnectionPair> $connections */
     public array $connections = [];
+
+    /** @var array<string, int> : 유저아이디로 커넥션 pair를 찾을 수 있도록 하기 위함 */
+    public array $userUuidToConnectionId = [];
     private ?LoggerInterface $logger = null;
 
     private ?RequestDispatcher $dispatcher = null;

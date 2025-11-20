@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\User;
 
-use App\Application;
+use App\Controller\ChatController;
+use App\Controller\RequestHandlerInterface;
+use App\Exception\ApiException;
 use App\Model\User;
 use App\Repository\UserRepository;
 use App\Request\BaseRequest;
-use App\Request\UserCreatePayload;
+use App\Request\User\UserCreatePayload;
 use App\Response\BaseResponse;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Ratchet\App;
 use Ratchet\ConnectionInterface;
 
 class UserCreateHandler implements RequestHandlerInterface
@@ -40,6 +40,15 @@ class UserCreateHandler implements RequestHandlerInterface
         $baseRequest->payload = UserCreatePayload::fromJson($decoded['payload']);
         $this->logger->info("Event [{$baseRequest->eventName}] 's payload : ", $baseRequest->payload->toArray());
         // TODO:유효성 검사
+
+        $exists = $this->repository->existsById($baseRequest->payload->id);
+        if($exists) {
+            throw new ApiException(
+                message: 'this id is already exists. please use another different id',
+                code: 100001,
+            );
+        }
+
         // Model생성
         $model = User::builder()
             ->id($baseRequest->payload->id)
@@ -59,12 +68,6 @@ class UserCreateHandler implements RequestHandlerInterface
             ->data($user->toArray())
             ->code(200)
             ->build();
-
-        // 메모리 set
-        $objectId = spl_object_id($from);
-        $this->logger->info('connections: ', $chatController->connections);
-        $chatController->connections[$objectId]->profile = $user;
-        $this->logger->info('after connections: ', $chatController->connections);
 
         $from->send(json_encode($response->toArray()));
     }

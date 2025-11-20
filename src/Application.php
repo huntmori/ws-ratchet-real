@@ -44,11 +44,11 @@ class Application
         }
 
         // set db
-        $meedo = $this->setMeedo($containerBuilder);
+        $medoo = $this->setMeedo($containerBuilder);
 
-        if($meedo->info()) {
+        if($medoo->info()) {
             $logger->info('Medoo 초기화 완료');
-            $logger->info("test query", $meedo->pdo->query("select now()")->fetchAll());
+            $logger->info("test query", $medoo->pdo->query("select now()")->fetchAll());
         }
 
         // set redis

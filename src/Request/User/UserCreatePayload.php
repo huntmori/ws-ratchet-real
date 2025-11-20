@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Request;
+namespace App\Request\User;
 
 use App\Attribute\FromArrayKey;
 use App\Attribute\ToArrayKey;
+use App\Request\BasePayload;
 use App\Trait\ArraySerializable;
 use App\Trait\Buildable;
 

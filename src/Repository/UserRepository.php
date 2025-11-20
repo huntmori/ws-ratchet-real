@@ -53,4 +53,14 @@ class UserRepository extends BaseRepository
     {
         return null;
     }
+
+    public function existsById(string $id): bool
+    {
+        return $this->medoo->has(
+            'user',
+            [
+                'id' => $id
+            ]
+        );
+    }
 }
