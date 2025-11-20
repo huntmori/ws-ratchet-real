@@ -29,9 +29,9 @@ class BaseResponse
     public int $code;
 
     #[ToArrayKey(key: 'error', exclude: false)]
-    public string $error;
+    public ?string $error;
 
     #[ToArrayKey(key: 'error_description', exclude: false)]
-    public string $errorDescription;
+    public ?string $errorDescription;
 
 }

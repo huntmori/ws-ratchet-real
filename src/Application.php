@@ -40,6 +40,7 @@ class Application
         $this->setEnv($containerBuilder);
         if(count($_ENV) > 0) {
             $logger->info('env 로드 완료');
+            $logger->info('$_ENV[\'DB_HOST\'] : ', [$_ENV['DB_HOST']]);
         }
 
         // set db
@@ -47,6 +48,7 @@ class Application
 
         if($meedo->info()) {
             $logger->info('Medoo 초기화 완료');
+            $logger->info("test query", $meedo->pdo->query("select now()")->fetchAll());
         }
 
         // set redis
@@ -54,10 +56,11 @@ class Application
         if($redis->info()) {
             $logger->info('redis client 초기화 완료');
         }
+
         $containerBuilder->useAutowiring(true);
         $this->container = $containerBuilder->build();
 
-        $app = $this->setRatchet();
+        $app = $this->setRatchet($containerBuilder);
 
         return $this;
     }
@@ -96,6 +99,7 @@ class Application
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_general_ci',
             'port' => $_ENV['DB_PORT'],
+            'logging'=>true
         ]);
 
         $containerBuilder->addDefinitions([
@@ -120,7 +124,7 @@ class Application
 
     }
 
-    private function setRatchet(): App
+    private function setRatchet(ContainerBuilder $builder): App
     {
         $logger =  $this->container->get(LoggerInterface::class);
         $logger->info('Ratchet 서버 초기화', [
@@ -133,6 +137,9 @@ class Application
         ]);
 
         $chat = new ChatController($this->container);
+
+        $chat->registerDispatchers();
+
         $app = new \Ratchet\App('localhost', 8888, '0.0.0.0', $this->eventLoop);
         $app->route('/chat', $chat, array('*'));
 

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Exception\ApiException;
+use App\Request\BaseRequest;
+use App\Response\BaseResponse;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 
@@ -17,21 +19,23 @@ class RequestDispatcher
 
     public function registerHandler(RequestHandlerInterface $handler): void
     {
+        $this->logger->info('register handler : ' . $handler->getEventName());
         $this->handlers[$handler->getEventName()] = $handler;
     }
-    public function dispatch(ConnectionInterface $from, string $message): void
+    public function dispatch(ConnectionInterface $from, string $message, ChatController $chatController): void
     {
         $this->logger->info('message Coming : ' . $message);
 
         try {
             $data = json_decode($message, true);
-            $command = $data['event_name'] ?? 'empty';
 
-            if (!isset($this->handlers[$command])) {
-                throw new ApiException("Unknown command: {$command}", 400);
+            $request = BaseRequest::fromJson($message);
+            $eventType = $request->eventName;
+            if (!isset($this->handlers[$request->eventName])) {
+                throw new ApiException("Unknown command: {$eventType}", 400);
             }
 
-            $this->handlers[$command]->handle($from, $data);
+            $this->handlers[$eventType]->handle($from, $data, $chatController);
         } catch (ApiException $e) {
             $response = $e->toResponse();
             $from->send($response->toJson());

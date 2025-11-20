@@ -167,10 +167,48 @@ trait ArraySerializable
     }
 
     /**
-     * 복잡한 타입 변환 (Enum, 객체 등)
+     * 복잡한 타입 변환 (Enum, DateTime, 객체 등)
      */
     private static function convertComplexType(string $typeName, mixed $value): mixed
     {
+        // DateTime 처리
+        if ($typeName === 'DateTime' || is_subclass_of($typeName, \DateTime::class)) {
+            if (is_string($value)) {
+                try {
+                    return new \DateTime($value);
+                } catch (\Exception $e) {
+                    throw new InvalidArgumentException(
+                        "Cannot convert '{$value}' to DateTime: " . $e->getMessage()
+                    );
+                }
+            }
+            if ($value instanceof \DateTime) {
+                return $value;
+            }
+            throw new InvalidArgumentException(
+                "Cannot convert value of type " . gettype($value) . " to DateTime"
+            );
+        }
+
+        // DateTimeImmutable 처리
+        if ($typeName === 'DateTimeImmutable' || is_subclass_of($typeName, \DateTimeImmutable::class)) {
+            if (is_string($value)) {
+                try {
+                    return new \DateTimeImmutable($value);
+                } catch (\Exception $e) {
+                    throw new InvalidArgumentException(
+                        "Cannot convert '{$value}' to DateTimeImmutable: " . $e->getMessage()
+                    );
+                }
+            }
+            if ($value instanceof \DateTimeImmutable) {
+                return $value;
+            }
+            throw new InvalidArgumentException(
+                "Cannot convert value of type " . gettype($value) . " to DateTimeImmutable"
+            );
+        }
+
         // Enum 처리
         if (enum_exists($typeName)) {
             if (is_subclass_of($typeName, BackedEnum::class)) {
@@ -204,6 +242,11 @@ trait ArraySerializable
 
         if (is_array($value)) {
             return array_map(fn($v) => self::serializeValue($v), $value);
+        }
+
+        // DateTime 객체를 ISO 8601 문자열로 변환
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d H:i:s');
         }
 
         if ($value instanceof BackedEnum) {

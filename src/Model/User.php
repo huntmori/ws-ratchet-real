@@ -15,7 +15,7 @@ class User
     #[ToArrayKey(key: 'idx')]
     public ?int $idx = null;
 
-    #[ToArrayKey(key: 'uuid', exclude: true)]
+    #[ToArrayKey(key: 'uuid', exclude: false)]
     #[FromArrayKey(key: 'uuid', required: false)]
     public ?string $uuid = null;
 

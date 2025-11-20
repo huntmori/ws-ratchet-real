@@ -11,14 +11,16 @@ use Ratchet\MessageComponentInterface;
 class ChatController implements MessageComponentInterface
 {
     /** @var array<int, ConnectionPair> $connections */
-    private array $connections = [];
+    public array $connections = [];
     private ?LoggerInterface $logger = null;
 
     private ?RequestDispatcher $dispatcher = null;
+    private ?ContainerInterface $container = null;
     public function __construct(ContainerInterface $c)
     {
         $this->logger = $c->get(LoggerInterface::class);
         $this->dispatcher = $c->get(RequestDispatcher::class);
+        $this->container = $c;
     }
 
     function onOpen(ConnectionInterface $conn): void
@@ -75,19 +77,31 @@ class ChatController implements MessageComponentInterface
             $this->logger->info("발신자: " . spl_object_id($from));
             $this->logger->info("내용: " . $msg);
 
-            // 다른 모든 클라이언트에게 메시지 전송
-            $sent = 0;
-            foreach ($this->connections as $key => $value) {
-                if ($key !== spl_object_id($from)) {
-                    $value->connection->send($msg);
-                    $sent++;
-                }
-            }
+            $decode = json_decode($msg, true);
 
-            $this->logger->info("{$sent}명에게 전송 완료");
+            $this->dispatcher->dispatch($from, $msg, $this);
+            // 다른 모든 클라이언트에게 메시지 전송
+//            $sent = 0;
+//            foreach ($this->connections as $key => $value) {
+//                if ($key !== spl_object_id($from)) {
+//                    $value->connection->send($msg);
+//                    $sent++;
+//                }
+//            }
+
+            //$this->logger->info("{$sent}명에게 전송 완료");
         } catch (\Throwable $e) {
             $this->logger->error("onMessage 오류: " . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
         }
+    }
+
+    public function registerDispatchers(): self
+    {
+        $this->dispatcher->registerHandler(
+            $this->container->get(UserCreateHandler::class)
+        );
+
+        return $this;
     }
 }

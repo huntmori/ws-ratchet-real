@@ -44,7 +44,7 @@ trait Buildable
     /**
      * 현재 인스턴스를 반환합니다 (빌더 패턴의 마지막 단계).
      */
-    public function build(): static
+    public function build(): self
     {
         return $this;
     }
