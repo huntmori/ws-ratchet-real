@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\ConnectionPair;
 use App\Controller\User\UserCreateHandler;
 use App\Controller\User\UserLoginHandler;
+use App\Request\Room\RoomCreatePayload;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
@@ -85,16 +86,6 @@ final class ChatController implements MessageComponentInterface
             $decode = json_decode($msg, true);
 
             $this->dispatcher->dispatch($from, $msg, $this);
-            // 다른 모든 클라이언트에게 메시지 전송
-//            $sent = 0;
-//            foreach ($this->connections as $key => $value) {
-//                if ($key !== spl_object_id($from)) {
-//                    $value->connection->send($msg);
-//                    $sent++;
-//                }
-//            }
-
-            //$this->logger->info("{$sent}명에게 전송 완료");
         } catch (\Throwable $e) {
             $this->logger->error("onMessage 오류: " . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -103,12 +94,10 @@ final class ChatController implements MessageComponentInterface
 
     public function registerDispatchers(): self
     {
-        $this->dispatcher->registerHandler(
-            $this->container->get(UserCreateHandler::class)
-        );
-        $this->dispatcher->registerHandler(
-            $this->container->get(UserLoginHandler::class)
-        );
+        $this->dispatcher
+            ->registerHandler( $this->container->get(UserCreateHandler::class) )
+            ->registerHandler( $this->container->get(UserLoginHandler::class) )
+            ->registerHandler( $this->container->get(RoomCreatePayload::class));
 
         return $this;
     }

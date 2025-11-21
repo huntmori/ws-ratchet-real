@@ -17,10 +17,12 @@ class RequestDispatcher
         private readonly LoggerInterface $logger
     ) {}
 
-    public function registerHandler(RequestHandlerInterface $handler): void
+    public function registerHandler(RequestHandlerInterface $handler): self
     {
         $this->logger->info('register handler : ' . $handler->getEventName());
         $this->handlers[$handler->getEventName()] = $handler;
+
+        return $this;
     }
     public function dispatch(ConnectionInterface $from, string $message, ChatController $chatController): void
     {

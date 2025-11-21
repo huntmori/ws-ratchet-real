@@ -141,6 +141,8 @@ class Application
     public function run(): void
     {
         $logger =  $this->container->get(LoggerInterface::class);
+        
+        // 주기적인 로그
         $this->eventLoop->addPeriodicTimer(60, function() {
             /** @var LoggerInterface $logger */
             $logger = $this->container->get(LoggerInterface::class);

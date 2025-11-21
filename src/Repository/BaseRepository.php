@@ -11,9 +11,9 @@ class BaseRepository
     protected ?\Medoo\Medoo $medoo = null;
     protected ?LoggerInterface $logger = null;
 
-    public function __construct(ContainerInterface $c)
+    public function __construct(Medoo $medoo, LoggerInterface $logger)
     {
-        $this->medoo = $c->get(Medoo::class);
-        $this->logger = $c->get(LoggerInterface::class);
+        $this->medoo = $medoo;
+        $this->logger = $logger;
     }
 }

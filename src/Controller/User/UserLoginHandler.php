@@ -24,6 +24,7 @@ readonly class UserLoginHandler implements RequestHandlerInterface
      */
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
+        $this->logger->debug(__METHOD__. " is called");
         // dto 변ㄴ환
         $decoded = $data;
         $baseRequest = BaseRequest::fromJson($data);
@@ -38,11 +39,15 @@ readonly class UserLoginHandler implements RequestHandlerInterface
         $passwordMatch = false;
         if($idExists) {
             $user = $this->repository->getOneById($baseRequest->payload->id);
-
-            if($user->password !== $baseRequest->payload->password) {
+            $this->logger->debug('$user->password : ', [$user->password]);
+            $this->logger->debug('$baseRequest->payload->password : ', [$baseRequest->payload->password]);
+            if($user->password === $baseRequest->payload->password) {
                 $passwordMatch = true;
             }
         }
+
+        $this->logger->info('passwordMatch: ', [$passwordMatch]);
+        $this->logger->info('idExists: ', [$idExists]);
 
         // 오류처리
         if(($passwordMatch && $idExists) === false) {
@@ -53,7 +58,8 @@ readonly class UserLoginHandler implements RequestHandlerInterface
         }
 
         $chatController->connections[spl_object_id($from)]->profile = $user;
-
+        $this->logger->debug('type of connection is : ', [gettype($from), get_class($from)]);
+        $this->logger->debug('get called class : ', [get_called_class()]);
         $from->send($user->toJson());
     }
 

@@ -5,12 +5,13 @@ namespace App\Repository;
 use App\Model\User;
 use Medoo\Medoo;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 class UserRepository extends BaseRepository
 {
-    public function __construct(ContainerInterface $c)
+    public function __construct(Medoo $medoo, LoggerInterface $logger)
     {
-        parent::__construct($c);
+        parent::__construct($medoo, $logger);
     }
 
     public function save(User $user): ?User
