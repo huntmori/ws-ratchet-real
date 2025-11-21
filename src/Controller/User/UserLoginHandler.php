@@ -12,11 +12,11 @@ use App\Request\User\UserLoginPayload;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 
-class UserLoginHandler implements RequestHandlerInterface
+readonly class UserLoginHandler implements RequestHandlerInterface
 {
     public function __construct(
-        private readonly UserRepository $repository,
-        private readonly LoggerInterface $logger
+        private UserRepository  $repository,
+        private LoggerInterface $logger
     ) {}
 
     /**
@@ -24,27 +24,28 @@ class UserLoginHandler implements RequestHandlerInterface
      */
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
+        // dto 변ㄴ환
         $decoded = $data;
         $baseRequest = BaseRequest::fromJson($data);
         $baseRequest->payload = UserLoginPayload::fromJson($decoded['payload']);
 
-        $result = true;
-        $exist = $this->repository->existsById($baseRequest->payload->id);
+        // id 존재 확인
+        $idExists = true;
+        $idExists = $this->repository->existsById($baseRequest->payload->id);
 
-        if(!$exist) {
-            $result = false;
-        }
-
+        // password 일치 확인
         $user = null;
-        if($result) {
+        $passwordMatch = false;
+        if($idExists) {
             $user = $this->repository->getOneById($baseRequest->payload->id);
 
             if($user->password !== $baseRequest->payload->password) {
-                $result = false;
+                $passwordMatch = true;
             }
         }
 
-        if(!$result) {
+        // 오류처리
+        if(($passwordMatch && $idExists) === false) {
             throw new ApiException(
                 message: 'please check you id or password',
                 code: 100001
@@ -52,6 +53,8 @@ class UserLoginHandler implements RequestHandlerInterface
         }
 
         $chatController->connections[spl_object_id($from)]->profile = $user;
+
+        $from->send($user->toJson());
     }
 
     public function getEventName(): string
