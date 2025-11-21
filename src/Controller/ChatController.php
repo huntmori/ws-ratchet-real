@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\ConnectionPair;
 use App\Controller\Room\RoomCreateHandler;
+use App\Controller\Room\RoomJoinHandler;
 use App\Controller\User\UserCreateHandler;
 use App\Controller\User\UserLoginHandler;
 use App\Model\Room;
 use App\Request\Room\RoomCreatePayload;
+use App\RoomUserPair;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
@@ -18,7 +20,7 @@ final class ChatController implements MessageComponentInterface
     /** @var array<int, ConnectionPair> $connections */
     public array $connections = [];
 
-    /** @var array<string, Room> */
+    /** @var array<string, RoomUserPair> */
     public array $rooms = [];
 
     /** @var array<string, int> : 유저아이디로 커넥션 pair를 찾을 수 있도록 하기 위함 */
@@ -100,10 +102,31 @@ final class ChatController implements MessageComponentInterface
     public function registerDispatchers(): self
     {
         $this->dispatcher
-            ->registerHandler( $this->container->get(UserCreateHandler::class) )
-            ->registerHandler( $this->container->get(UserLoginHandler::class) )
-            ->registerHandler( $this->container->get(RoomCreateHandler::class));
-
+            ->registerHandler($this->container->get(UserCreateHandler::class))
+            ->registerHandler($this->container->get(UserLoginHandler::class))
+            ->registerHandler($this->container->get(RoomCreateHandler::class))
+            ->registerHandler($this->container->get(RoomJoinHandler::class));
         return $this;
+    }
+
+    public function setRoomPair(?Room $room, \App\Model\User $user): RoomUserPair
+    {
+        $sessionKey = RoomUserPair::getSessionKeyByUuid($room->uuid);
+        $this->logger->debug('rooms :', $this->rooms);
+        if(!array_key_exists($sessionKey, $this->rooms))
+        {
+            /** @var RoomUserPair $pair */
+            $pair = RoomUserPair::builder()
+                ->room($room)
+                ->users([])
+                ->build();
+            $pair->users[] = $user;
+
+            $this->rooms[$sessionKey] = $pair;
+        } else {
+            $this->rooms[$sessionKey]->users[] = $user;
+        }
+
+        return $this->rooms[$sessionKey];
     }
 }

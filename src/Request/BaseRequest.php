@@ -11,8 +11,8 @@ class BaseRequest
 {
     use Buildable, ArraySerializable;
     #[FromArrayKey(key: 'event_name', required: true)]
-    public string $eventName;
+    public ?string $eventName = null;
 
     #[ArrayKeyIgnore]
-    public ?BasePayload $payload;
+    public ?BasePayload $payload = null;
 }

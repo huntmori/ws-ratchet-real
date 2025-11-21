@@ -64,7 +64,6 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
         $room = $this->roomRepository->save($room);
         $this->logger->info("Room created with ID: " . $room->uuid);
 
-
         // room join
         $join = UsersInRoom::builder()
             ->userUuid($owner->uuid)
@@ -73,16 +72,9 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
             ->build();
         $inRoom = $this->usersInRoomRepository->save($join);
 
-        // send dto
-        $dto = new RoomCreateResponse();
-        $dto->room = $room;
-        $dto->users[] = $owner;
+        $pair = $chatController->setRoomPair($room, $owner);
 
-        $from->send(
-            json_encode(
-                $dto->toArray()
-            )
-        );
+        $from->send($pair->toJson());
     }
 
     public function getEventName(): string
