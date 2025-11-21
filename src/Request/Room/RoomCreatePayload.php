@@ -10,6 +10,19 @@ use App\Request\BasePayload;
 use App\Trait\ArraySerializable;
 use App\Trait\Buildable;
 
+
+/**
+ * RoomCreatePayload
+ *
+ * @method static RoomCreatePayload builder()
+ * @method RoomCreatePayload build()
+ *
+ * Setter methods:
+ * @method RoomCreatePayload roomName(string $roomName)
+ * @method RoomCreatePayload maxUsers(int $maxUsers)
+ * @method RoomCreatePayload joinType(string $joinType)
+ * @method RoomCreatePayload password(?string $password)
+ */
 class RoomCreatePayload implements BasePayload
 {
     use Buildable, ArraySerializable;

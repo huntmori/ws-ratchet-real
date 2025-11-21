@@ -23,6 +23,8 @@ class Application
     protected ?LoopInterface $eventLoop = null;
     protected ?ContainerInterface $container = null;
 
+    protected ?LoggerInterface $logger = null;
+
     protected App $app;
 
     public function __construct()
@@ -36,6 +38,7 @@ class Application
         // set logger
         $logger = $this->setLogger($containerBuilder);
         $logger->info('logger 초기화 완료');
+        $this->logger = $logger;
         // set env
         $this->setEnv($containerBuilder);
         if(count($_ENV) > 0) {
@@ -58,11 +61,16 @@ class Application
         }
 
         $containerBuilder->useAutowiring(true);
-        $this->container = $containerBuilder->build();
+        try {
+            $this->container = $containerBuilder->build();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            $this->logger->error("failed container build");
+            exit(1);
+        }
         $app = $this->setRatchet();
 
         $logger->info("WebSocket server started on 0.0.0.0:8888");
-
 
         return $this;
     }
@@ -140,7 +148,7 @@ class Application
 
     public function run(): void
     {
-        $logger =  $this->container->get(LoggerInterface::class);
+        $logger =  $this->logger;
         
         // 주기적인 로그
         $this->eventLoop->addPeriodicTimer(60, function() {
@@ -154,9 +162,7 @@ class Application
             'port' => $this->port
         ]);
 
-        $logger->info('eventLoop ? ', [
-            spl_object_id($this->eventLoop)
-        ]);
+        $logger->info('eventLoop ? ', [spl_object_id($this->eventLoop)]);
         $this->app->run();
     }
 }

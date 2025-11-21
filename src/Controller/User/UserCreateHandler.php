@@ -13,7 +13,7 @@ use App\Response\BaseResponse;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 
-class UserCreateHandler implements RequestHandlerInterface
+final readonly class UserCreateHandler implements RequestHandlerInterface
 {
     public const string EVENT_NAME = "user.create";
     private readonly ?LoggerInterface $logger;

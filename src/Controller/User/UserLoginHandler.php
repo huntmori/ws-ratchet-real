@@ -12,7 +12,7 @@ use App\Request\User\UserLoginPayload;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 
-readonly class UserLoginHandler implements RequestHandlerInterface
+final readonly class UserLoginHandler implements RequestHandlerInterface
 {
     public function __construct(
         private UserRepository  $repository,

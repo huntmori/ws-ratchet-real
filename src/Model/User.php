@@ -13,7 +13,7 @@ use App\Trait\Buildable;
  * @method User password(string $password)
  * @method User createdAt(\DateTime $createdAt)
  */
-class User
+class User extends BaseModel
 {
     use Buildable,
         ArraySerializable;
