@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\ConnectionPair;
+use App\Controller\Room\RoomCreateHandler;
 use App\Controller\User\UserCreateHandler;
 use App\Controller\User\UserLoginHandler;
+use App\Model\Room;
 use App\Request\Room\RoomCreatePayload;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -15,6 +17,9 @@ final class ChatController implements MessageComponentInterface
 {
     /** @var array<int, ConnectionPair> $connections */
     public array $connections = [];
+
+    /** @var array<string, Room> */
+    public array $rooms = [];
 
     /** @var array<string, int> : 유저아이디로 커넥션 pair를 찾을 수 있도록 하기 위함 */
     public array $userUuidToConnectionId = [];
@@ -97,7 +102,7 @@ final class ChatController implements MessageComponentInterface
         $this->dispatcher
             ->registerHandler( $this->container->get(UserCreateHandler::class) )
             ->registerHandler( $this->container->get(UserLoginHandler::class) )
-            ->registerHandler( $this->container->get(RoomCreatePayload::class));
+            ->registerHandler( $this->container->get(RoomCreateHandler::class));
 
         return $this;
     }

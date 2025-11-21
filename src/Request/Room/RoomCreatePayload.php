@@ -29,7 +29,7 @@ class RoomCreatePayload implements BasePayload
     public const string EVENT_NAME = "room.create";
     #[FromArrayKey(key: 'room_name', required: true)]
     #[ToArrayKey(key: 'room_name')]
-    public ?string $roomName;
+    public ?string $roomName = null;
 
     #[FromArrayKey(key: 'maximum_users', required: false)]
     #[ToArrayKey(key: 'maximum_users')]
@@ -37,14 +37,14 @@ class RoomCreatePayload implements BasePayload
 
     #[FromArrayKey(key: 'join_type', required: false)]
     #[ToArrayKey(key: 'join_type')]
-    public ?JoinType $joinType;
+    public ?JoinType $joinType = null;
 
     #[FromArrayKey(key: 'open_type', required: false)]
     #[ToArrayKey(key: 'open_type')]
-    public ?OpenType $openType;
+    public ?OpenType $openType = null;
 
     #[FromArrayKey(key: 'join_password', required: false)]
     #[ToArrayKey(key: 'join_password', exclude: true)]
-    public ?string $joinPassword;
+    public ?string $joinPassword = null;
 
 }

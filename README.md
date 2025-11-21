@@ -28,11 +28,12 @@ docker-compose build --no-cache app
 RoomCreate
 ```JSON
 {
-  "command": "room_create",
-  "data": {
-    "room_name" : "test",
-    "join_type": "OPENED",
-    "room_type": "GROUP"
+  "event_name": "room.create",
+  "payload": {
+    "room_name": "PUBLIC ROOM",
+    "maximum_users": 8,
+    "join_type": "PUBLIC",
+    "open_type": "PUBLIC"
   }
 }
 ```
@@ -48,7 +49,7 @@ Room List
 UserCreate
 ```JSON
 {
-  "event_name": ":user.create",
+  "event_name": "user.create",
   "payload": {
     "id" : "kknd",
     "password": "1q2w3e"
