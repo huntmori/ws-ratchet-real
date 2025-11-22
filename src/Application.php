@@ -120,7 +120,7 @@ class Application
 
     private function setRedis(ContainerBuilder $containerBuilder): Client
     {
-        $redis = new \Predis\Client([
+        $redis = new Client([
             'scheme' => 'tcp',
             'host'   => $_ENV['REDIS_HOST'],
             'port'   => $_ENV['REDIS_PORT'],
@@ -139,7 +139,7 @@ class Application
         $chat = $this->container->get(ChatController::class);
         $chat->registerDispatchers();
 
-        $app = new \Ratchet\App('localhost', 8888, '0.0.0.0', $this->eventLoop);
+        $app = new App('localhost', 8888, '0.0.0.0', $this->eventLoop);
         $app->route('/chat', $chat, array('*'));
 
         $this->app = $app;
@@ -155,7 +155,13 @@ class Application
             /** @var LoggerInterface $logger */
             $logger = $this->container->get(LoggerInterface::class);
 
+            $logger->info("=================================================================================");
+            $logger->info("=================================================================================");
             $logger->info('connections : ', $this->container->get(ChatController::class)->connections);
+            $logger->info("=================================================================================");
+            $logger->info('rooms :', $this->container->get(ChatController::class)->rooms);
+            $logger->info("=================================================================================");
+            $logger->info("=================================================================================");
         });
         $logger->info('Ratchet 서버 초기화', [
             'host' => $this->host,

@@ -13,6 +13,7 @@ use App\Repository\UsersInRoomRepository;
 use App\Request\BasePayload;
 use App\Request\BaseRequest;
 use App\Request\Room\RoomJoinPayload;
+use App\Response\BaseResponse;
 use App\RoomUserPair;
 use http\Message;
 use Psr\Log\LoggerInterface;
@@ -59,8 +60,8 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
                 code: -1
             );
         }
-        // exist check
-        
+        // TODO: exist check
+
 
         // insert users in room
         $inRoom = UsersInRoom::builder()
@@ -80,7 +81,11 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
 
         $pair = $chatController->setRoomPair($room, $user);
 
-        $from->send($pair->toJson());
+        $response = BaseResponse::builder()
+            ->success(true)
+            ->data($pair)
+            ->build();
+        $from->send($response->toJson());
     }
 
     public function getEventName(): string
