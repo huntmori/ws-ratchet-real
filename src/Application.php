@@ -141,6 +141,7 @@ class Application
 
     private function setRatchet(): App
     {
+        /** @var ChatController $chat */
         $chat = $this->container->get(ChatController::class);
         $chat->registerDispatchers();
 

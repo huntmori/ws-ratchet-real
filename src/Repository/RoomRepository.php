@@ -76,4 +76,9 @@ class RoomRepository extends BaseRepository
         $row = $this->medoo->select('room', '*', ['uuid' => $array_map]);
         return array_map(fn($row) => Room::fromJson($row), $row);
     }
+
+    public function existByUuid($roomUuid): bool
+    {
+        return $this->medoo->has('room', ['uuid' => $roomUuid]);
+    }
 }

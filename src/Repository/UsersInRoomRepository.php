@@ -87,4 +87,14 @@ class UsersInRoomRepository extends BaseRepository
 
         return array_map(fn($row) => UsersInRoom::fromJson($row), $row);
     }
+
+    public function existsByRoomUUidAndUserUuid($roomUuid, string $userUuid): bool
+    {
+        return $this->medoo->has(
+            'users_in_room',
+            [
+                'room_uuid' => $roomUuid,
+                'user_uuid' => $userUuid
+            ]);
+    }
 }

@@ -95,4 +95,9 @@ class UserRepository extends BaseRepository
             return User::fromJson($row);
         }, $result);
     }
+
+    public function existsByUuid(string $userUuid): bool
+    {
+        return $this->medoo->has('user', ['uuid' => $userUuid]);
+    }
 }

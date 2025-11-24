@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\ConnectionPair;
+use App\Controller\Room\RoomChatHandler;
 use App\Controller\Room\RoomCreateHandler;
 use App\Controller\Room\RoomJoinHandler;
 use App\Controller\User\UserCreateHandler;
@@ -106,7 +107,8 @@ final class ChatController implements MessageComponentInterface
             ->registerHandler($this->container->get(UserCreateHandler::class))
             ->registerHandler($this->container->get(UserLoginHandler::class))
             ->registerHandler($this->container->get(RoomCreateHandler::class))
-            ->registerHandler($this->container->get(RoomJoinHandler::class));
+            ->registerHandler($this->container->get(RoomJoinHandler::class))
+            ->registerHandler($this->container->get(RoomChatHandler::class));
         return $this;
     }
 
