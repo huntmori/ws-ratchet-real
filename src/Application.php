@@ -105,11 +105,16 @@ class Application
             'username' => $_ENV['DB_USERNAME'],
             'password' => $_ENV['DB_PASSWORD'],
 
-            // [optional]
+            // [optional]  // [optional]
             'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_general_ci',
+            'collation' => 'utf8mb4_unicode_ci',  // 명시적으로 지정
             'port' => $_ENV['DB_PORT'],
-            'logging'=>true
+            'logging'=>true,
+            // PDO 옵션 추가 - 세션 레벨에서 collation 강제
+            'option' => [
+                \PDO::MYSQL_ATTR_INIT_COMMAND =>
+                    'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
+            ]
         ]);
 
         $containerBuilder->addDefinitions([

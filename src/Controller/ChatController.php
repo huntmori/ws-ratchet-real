@@ -8,6 +8,7 @@ use App\Controller\Room\RoomJoinHandler;
 use App\Controller\User\UserCreateHandler;
 use App\Controller\User\UserLoginHandler;
 use App\Model\Room;
+use App\Model\User;
 use App\Request\Room\RoomCreatePayload;
 use App\RoomUserPair;
 use Psr\Container\ContainerInterface;
@@ -109,9 +110,15 @@ final class ChatController implements MessageComponentInterface
         return $this;
     }
 
-    public function setRoomPair(?Room $room, \App\Model\User $user): RoomUserPair
+    public function setRoomPair(?Room $room, User $user, ?ConnectionInterface $connection): RoomUserPair
     {
         $sessionKey = RoomUserPair::getSessionKeyByUuid($room->uuid);
+
+        if($connection !== null) {
+            $this->userUuidToConnectionId[$user->uuid] = spl_object_id($connection);
+            $user->connection = $connection;
+        }
+
         $this->logger->debug('rooms :', $this->rooms);
         if(!array_key_exists($sessionKey, $this->rooms))
         {
@@ -119,6 +126,7 @@ final class ChatController implements MessageComponentInterface
             $pair = RoomUserPair::builder()
                 ->room($room)
                 ->users([])
+                ->messages([])
                 ->build();
             $pair->users[] = $user;
 

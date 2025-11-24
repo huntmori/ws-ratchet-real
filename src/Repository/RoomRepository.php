@@ -66,4 +66,14 @@ class RoomRepository extends BaseRepository
 
         return Room::fromJson($row);
     }
+
+    public function getListByRoomUuid(array $array_map): array
+    {
+        if(empty($array_map)) {
+            return [];
+        }
+
+        $row = $this->medoo->select('room', '*', ['uuid' => $array_map]);
+        return array_map(fn($row) => Room::fromJson($row), $row);
+    }
 }

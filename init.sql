@@ -17,18 +17,45 @@ CREATE USER IF NOT EXISTS 'wsuser'@'%' IDENTIFIED BY 'wspass';
 
 -- 전체 권한 부여
 GRANT ALL PRIVILEGES ON *.* TO 'wsuser'@'%' WITH GRANT OPTION;
+CREATE TABLE `room` (
+                        `idx` bigint(20) NOT NULL AUTO_INCREMENT,
+                        `uuid` text      NOT NULL,
+                        `room_name` text      NOT NULL,
+                        `maximum_users` bigint(20) NOT NULL,
+                        `join_type` text      DEFAULT NULL,
+                        `open_type` text      DEFAULT NULL,
+                        `join_password` text      DEFAULT NULL,
+                        `created_datetime` datetime DEFAULT current_timestamp(),
+                        `updated_datetime` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                        `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+                        `deleted_datetime` datetime DEFAULT NULL,
+                        `room_state` text      NOT NULL,
+                        PRIMARY KEY (`idx`),
+                        UNIQUE KEY `room_pk` (`uuid`) USING HASH
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- user 테이블 생성
-CREATE TABLE IF NOT EXISTS `user` (
-    `idx` BIGINT(20) NOT NULL AUTO_INCREMENT,
-    `uuid` VARCHAR(255) NOT NULL,
-    `id` VARCHAR(255) NOT NULL,
-    `password` VARCHAR(255) NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`idx`),
-    UNIQUE KEY `user_uuid_unique` (`uuid`),
-    UNIQUE KEY `user_id_unique` (`id`)
+CREATE TABLE `user` (
+                        `idx` bigint(20) NOT NULL AUTO_INCREMENT,
+                        `uuid` text NOT NULL,
+                        `id` varchar(255) NOT NULL,
+                        `password` varchar(255) NOT NULL,
+                        `created_at` timestamp NULL DEFAULT current_timestamp(),
+                        PRIMARY KEY (`idx`),
+                        UNIQUE KEY `user_uuid_unique` (`uuid`) USING HASH,
+                        UNIQUE KEY `user_id_unique` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `users_in_room` (
+                                 `idx` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'auto increament',
+                                 `user_uuid` text      NOT NULL,
+                                 `room_uuid` text      NOT NULL,
+                                 `state` text      NOT NULL DEFAULT 'JOIN' COMMENT 'JOIN, LEAVE',
+                                 `created_datetime` datetime DEFAULT current_timestamp(),
+                                 `updated_datetime` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+                                 PRIMARY KEY (`idx`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 
 -- 권한 적용
 FLUSH PRIVILEGES;

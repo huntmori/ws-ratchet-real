@@ -79,7 +79,7 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
             );
         }
 
-        $pair = $chatController->setRoomPair($room, $user);
+        $pair = $chatController->setRoomPair($room, $user, $from);
 
         $response = BaseResponse::builder()
             ->success(true)

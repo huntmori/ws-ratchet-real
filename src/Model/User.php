@@ -2,10 +2,12 @@
 
 namespace App\Model;
 
+use App\Attribute\ArrayKeyIgnore;
 use App\Attribute\FromArrayKey;
 use App\Attribute\ToArrayKey;
 use App\Trait\ArraySerializable;
 use App\Trait\Buildable;
+use Ratchet\ConnectionInterface;
 
 /**
  * @method User id(string $id):
@@ -36,4 +38,7 @@ class User extends BaseModel
     #[ToArrayKey(key: 'created_at', exclude: false)]
     #[FromArrayKey(key: 'created_at', required: false)]
     public ?\DateTime $createdAt = null;
+
+    #[ArrayKeyIgnore]
+    public ConnectionInterface $connection;
 }

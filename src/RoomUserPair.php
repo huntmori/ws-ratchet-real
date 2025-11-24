@@ -9,6 +9,16 @@ use App\Model\User;
 use App\Trait\ArraySerializable;
 use App\Trait\Buildable;
 
+/**
+ * @method static RoomUserPair builder()
+ * @method RoomUserPair build()
+ * @property Room $room
+ * @property array<string, User> $users
+ * @property array<string, string> $messages
+ * @method RoomUserPair room(Room $room)
+ * @method RoomUserPair users(array<string, User> $users)
+ * @method RoomUserPair messages(array<string, string> $messages)
+ */
 class RoomUserPair
 {
     use Buildable, ArraySerializable;

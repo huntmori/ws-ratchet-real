@@ -77,4 +77,22 @@ class UserRepository extends BaseRepository
 
         return User::fromJson($result);
     }
+
+    public function getListByRoomUuid(string $roomUuid): array
+    {
+        $result = $this->medoo->select(
+            'user',
+            [
+                    "[><]users_in_room" => ["uuid" => "user_uuid"],
+                ],
+            '*',
+            ['users_in_room.room_uuid' => $roomUuid]
+        );
+
+        $this->logger->info('get of \'user\' table is ', $result);
+
+        return array_map(function($row) {
+            return User::fromJson($row);
+        }, $result);
+    }
 }

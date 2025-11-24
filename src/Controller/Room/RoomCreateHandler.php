@@ -72,7 +72,7 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
             ->build();
         $inRoom = $this->usersInRoomRepository->save($join);
 
-        $pair = $chatController->setRoomPair($room, $owner);
+        $pair = $chatController->setRoomPair($room, $owner, $from);
 
         $from->send($pair->toJson());
     }
