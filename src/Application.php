@@ -162,11 +162,9 @@ class Application
             $logger = $this->container->get(LoggerInterface::class);
 
             $logger->info("=================================================================================");
-            $logger->info("=================================================================================");
             $logger->info('connections : ', $this->container->get(ChatController::class)->connections);
             $logger->info("=================================================================================");
-            $logger->info('rooms :', $this->container->get(ChatController::class)->rooms);
-            $logger->info("=================================================================================");
+            $logger->info('users : ', $this->container->get(ChatController::class)->users);
             $logger->info("=================================================================================");
         });
         $logger->info('Ratchet 서버 초기화', [

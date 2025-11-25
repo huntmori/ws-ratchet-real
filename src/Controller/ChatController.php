@@ -22,11 +22,9 @@ final class ChatController implements MessageComponentInterface
     /** @var array<int, ConnectionPair> $connections */
     public array $connections = [];
 
-    /** @var array<string, RoomUserPair> */
-    public array $rooms = [];
+    /** @var array<string, User> */
+    public array $users = [];
 
-    /** @var array<string, int> : 유저아이디로 커넥션 pair를 찾을 수 있도록 하기 위함 */
-    public array $userUuidToConnectionId = [];
     private ?LoggerInterface $logger = null;
 
     private ?RequestDispatcher $dispatcher = null;
@@ -45,7 +43,7 @@ final class ChatController implements MessageComponentInterface
         $this->logger->info("주소: " . $conn->remoteAddress);
 
         try {
-            $pair = new ConnectionPair();
+            $pair = new ConnectionPair($conn, null);
             $pair->connection = $conn;
             $this->connections[spl_object_id($conn)] = $pair;
 
@@ -96,7 +94,7 @@ final class ChatController implements MessageComponentInterface
 
             $this->dispatcher->dispatch($from, $msg, $this);
         } catch (\Throwable $e) {
-            $this->logger->error("onMessage 오류: " . $e->getMessage());
+            $this->logger->error("onMessage 오류: " . $e->getMessage(), [$e->getLine()]);
             $this->logger->error($e->getTraceAsString());
         }
     }
@@ -110,33 +108,5 @@ final class ChatController implements MessageComponentInterface
             ->registerHandler($this->container->get(RoomJoinHandler::class))
             ->registerHandler($this->container->get(RoomChatHandler::class));
         return $this;
-    }
-
-    public function setRoomPair(?Room $room, User $user, ?ConnectionInterface $connection): RoomUserPair
-    {
-        $sessionKey = RoomUserPair::getSessionKeyByUuid($room->uuid);
-
-        if($connection !== null) {
-            $this->userUuidToConnectionId[$user->uuid] = spl_object_id($connection);
-            $user->connection = $connection;
-        }
-
-        $this->logger->debug('rooms :', $this->rooms);
-        if(!array_key_exists($sessionKey, $this->rooms))
-        {
-            /** @var RoomUserPair $pair */
-            $pair = RoomUserPair::builder()
-                ->room($room)
-                ->users([])
-                ->messages([])
-                ->build();
-            $pair->users[] = $user;
-
-            $this->rooms[$sessionKey] = $pair;
-        } else {
-            $this->rooms[$sessionKey]->users[] = $user;
-        }
-
-        return $this->rooms[$sessionKey];
     }
 }

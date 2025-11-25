@@ -9,4 +9,10 @@ class ConnectionPair
 {
     public ConnectionInterface $connection;
     public ?User $profile = null;
+
+    public function __construct(ConnectionInterface $con, ?User $user)
+    {
+        $this->connection = $con;
+        $this->profile = $user;
+    }
 }

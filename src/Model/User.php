@@ -14,6 +14,7 @@ use Ratchet\ConnectionInterface;
  * @method User uuid(string $uuid)
  * @method User password(string $password)
  * @method User createdAt(\DateTime $createdAt)
+ * @method string uuid()
  */
 class User extends BaseModel
 {

@@ -97,4 +97,19 @@ class UsersInRoomRepository extends BaseRepository
                 'user_uuid' => $userUuid
             ]);
     }
+
+    /**
+     * @param string $roomUuid
+     * @return array<UsersInRoom>
+     */
+    public function getListByRoomUuid(string $roomUuid): array
+    {
+        $rows = $this->medoo->select(
+            'users_in_room',
+            '*',
+            [
+                'room_uuid' => $roomUuid,
+            ]);
+        return array_map(fn($row) => UsersInRoom::fromJson($row), $rows);
+    }
 }

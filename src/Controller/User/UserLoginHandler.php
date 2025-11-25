@@ -2,6 +2,7 @@
 
 namespace App\Controller\User;
 
+use App\ConnectionPair;
 use App\Controller\ChatController;
 use App\Controller\RequestHandlerInterface;
 use App\Exception\ApiException;
@@ -62,38 +63,12 @@ final readonly class UserLoginHandler implements RequestHandlerInterface
             );
         }
 
-        $chatController->connections[spl_object_id($from)]->profile = $user;
-        $this->logger->debug('type of connection is : ', [gettype($from), get_class($from)]);
-        $this->logger->debug('get called class : ', [get_called_class()]);
+        // 로그인 성공처리, 커넥션 설정
+        $connectionId = spl_object_id($from);
+        $pair = new ConnectionPair($from,  $user);
 
-        // 참가중인 방을 select하여 메모리에 set
-        $rooms = [];
-        // 참여 중인 방 정보 select
-        $usersInRoom = $this->usersInRoomRepository->getListByUserUuid($user->uuid);
-        $this->logger->debug('usersInRoom : ', [$usersInRoom]);
-
-        $rooms = $this->roomRepository->getListByRoomUuid(
-            array_map(fn($row) => $row->roomUuid, $usersInRoom)
-        );
-
-        // 룸 유저 select
-        for($i=0; $i<count($rooms); $i++)
-        {
-            $roomUuid = $rooms[$i]->uuid;
-
-            $users = $this->repository->getListByRoomUuid($roomUuid);
-            $sessionKey = RoomUserPair::getSessionKeyByUuid($roomUuid);
-
-            if(!array_key_exists($sessionKey, $chatController->rooms))
-            {
-                $pair = RoomUserPair::builder()
-                    ->room($rooms[$i])
-                    ->users($users)
-                    ->messages([])
-                    ->build();
-                $chatController->rooms[$sessionKey] = $pair;
-            }
-        }
+        $chatController->connections[$connectionId] = $pair;
+        $chatController->users[$user->uuid()] = $user;
 
         $from->send($user->toJson());
     }

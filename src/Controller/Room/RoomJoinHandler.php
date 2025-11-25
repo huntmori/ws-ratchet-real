@@ -51,7 +51,8 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
         }
 
         $key = spl_object_id($from);
-        $user = $chatController->connections[$key]->profile;
+        $userPair = $chatController->connections[$key];
+        $user = $userPair->profile;
 
         if($user === null)
         {
@@ -62,10 +63,9 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
         }
         // TODO: exist check
 
-
         // insert users in room
         $inRoom = UsersInRoom::builder()
-            ->userUuid($room->uuid())
+            ->userUuid($user->uuid())
             ->roomUuid($room->uuid())
             ->state(InRoomStatus::JOIN)
             ->build();
@@ -79,11 +79,9 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
             );
         }
 
-        $pair = $chatController->setRoomPair($room, $user, $from);
-
         $response = BaseResponse::builder()
             ->success(true)
-            ->data($pair)
+            ->data($room)
             ->build();
         $from->send($response->toJson());
     }

@@ -13,6 +13,7 @@ use App\Repository\UserRepository;
 use App\Repository\UsersInRoomRepository;
 use App\Request\BaseRequest;
 use App\Request\Room\ChatPayload;
+use App\Response\BaseResponse;
 use App\RoomUserPair;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
@@ -63,12 +64,6 @@ readonly class RoomChatHandler implements RequestHandlerInterface
             throw new ApiException('User is not joined in the room. Cannot send chat message.');
         }
 
-        // session key 확인
-        if(!array_key_exists($roomSessionKey, $chatController->rooms)) {
-            $this->logger->warning('Room not found in chat controller. Cannot send chat message.');
-            throw new ApiException('Room not found in chat controller. Cannot send chat message.');
-        }
-
         // message insert
         $message = RoomMessage::builder()
             ->roomUuid($roomUuid)
@@ -78,16 +73,36 @@ readonly class RoomChatHandler implements RequestHandlerInterface
             ->build();
         $message = $this->roomMessageRepository->save($message);
 
-        // send messages
-        $roomPair = $chatController->rooms[$roomSessionKey];
-        $roomPair->messages[] = $message;
+        // Room 유저들 조회
+        $users = $this->usersInRoomRepository->getListByRoomUuid($roomUuid);
+        $this->logger->debug('room users', [$users]);
 
-        for($i=0; $i<count($roomPair->users); $i++)
-        {
-            $connectionid = spl_object_id($roomPair->users[$i]->connection);
-            if($userConnectionId !== $connectionid) {
-                $roomPair->users[$i]->connection->send($message->toJson());
+        $messagePayload = [
+            'room_uuid'=> $roomUuid,
+            'user_uuid'=> $userUuid,
+            'message'=> $baseRequest->payload->message()
+        ];
+        $baseResponse = BaseResponse::builder()
+            ->success(true)
+            ->data($messagePayload)
+            ->build();
+
+        $targetUserUuids = array_map(
+            fn($e) => $e->userUuid(),
+            $users
+        );
+        $this->logger->debug('target user uuids', [$targetUserUuids]);
+        $filtered = [];
+        foreach($chatController->connections as $connection) {
+            $connectionUserUuid = $connection->profile->uuid() ?? null;
+            if($connectionUserUuid !== null && in_array($connectionUserUuid, $targetUserUuids, true)) {
+                $filtered[] = $connection;
             }
+        }
+        $this->logger->debug('filtered chat user', [$filtered]);
+
+        foreach ($filtered as $pair) {
+            $pair->connection->send($baseResponse->toJson());
         }
     }
 

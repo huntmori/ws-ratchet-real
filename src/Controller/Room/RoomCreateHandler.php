@@ -2,6 +2,7 @@
 
 namespace App\Controller\Room;
 
+use App\ConnectionPair;
 use App\Controller\ChatController;
 use App\Controller\RequestHandlerInterface;
 use App\Enum\InRoomStatus;
@@ -34,13 +35,15 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
      */
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
-        $this->logger->debug(__METHOD__. " is called");;
-        // TODO: Implement handle() method.
+        $this->logger->debug(__METHOD__. " is called");
+
         // dto 변환
         $baseRequest = BaseRequest::fromJson($data);
         $payload = $baseRequest->payload = RoomCreatePayload::fromJson($data['payload']);
         // 로그인 체크
         $key = spl_object_id($from);
+
+        /** @var ConnectionPair $connectionPair */
         $connectionPair = $chatController->connections[$key];
         if($connectionPair->profile === null) {
             throw new ApiException(
@@ -72,9 +75,7 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
             ->build();
         $inRoom = $this->usersInRoomRepository->save($join);
 
-        $pair = $chatController->setRoomPair($room, $owner, $from);
-
-        $from->send($pair->toJson());
+        $from->send($room->toJson());
     }
 
     public function getEventName(): string
