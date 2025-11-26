@@ -20,8 +20,6 @@ final readonly class UserLoginHandler implements RequestHandlerInterface
 {
     public function __construct(
         private UserRepository  $repository,
-        private UsersInRoomRepository $usersInRoomRepository,
-        private RoomRepository $roomRepository,
         private LoggerInterface $logger
     ) {}
 

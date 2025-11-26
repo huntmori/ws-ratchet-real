@@ -37,6 +37,16 @@ RoomCreate
   }
 }
 ```
+Room Message
+```JSON
+{
+  "event_name": "room.join",
+  "payload": {
+    "room_uuid": "bbbb719f-c9fe-11f0-8756-becea4e51719",
+    "room_password": null
+  }
+}
+```
 
 RoomJoin
 ```JSON

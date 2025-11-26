@@ -112,4 +112,21 @@ class UsersInRoomRepository extends BaseRepository
             ]);
         return array_map(fn($row) => UsersInRoom::fromJson($row), $rows);
     }
+
+    /**
+     * @param string|null $roomUuid
+     * @param string $userUuid
+     * @return bool
+     */
+    public function hasByRoomUuidAndUserUuid(?string $roomUuid, string $userUuid): bool
+    {
+        return  $this->medoo->has(
+            'users_in_room',
+            [
+                'room_uuid' => $roomUuid,
+                'user_uuid' => $userUuid,
+                'state' => InRoomStatus::JOIN->value
+            ]
+        );
+    }
 }

@@ -62,6 +62,13 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
             );
         }
         // TODO: exist check
+        $alreadyJoined = $this->usersInRoomRepository->hasByRoomUuidAndUserUuid($room->uuid(), $user->uuid());
+        $this->logger->info('already joined ? : ', [$alreadyJoined]);
+        if($alreadyJoined) {
+            throw new ApiException(
+                message: 'already in room',code: -1
+            );
+        }
 
         // insert users in room
         $inRoom = UsersInRoom::builder()
