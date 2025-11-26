@@ -84,6 +84,7 @@ readonly class RoomChatHandler implements RequestHandlerInterface
         ];
         $baseResponse = BaseResponse::builder()
             ->success(true)
+            ->eventName('room.chat')
             ->data($messagePayload)
             ->build();
 
