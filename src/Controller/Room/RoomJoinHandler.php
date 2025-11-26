@@ -70,6 +70,15 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
             );
         }
 
+        //현재 인원과 max인원 체크
+        $currentUsers = $this->usersInRoomRepository->countByRoomUuid($room->uuid());
+        if($currentUsers >= $room->maximumUsers) {
+            throw new ApiException(
+                message: 'room is full',
+                code: -1
+            );
+        }
+
         // insert users in room
         $inRoom = UsersInRoom::builder()
             ->userUuid($user->uuid())

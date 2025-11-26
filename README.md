@@ -40,10 +40,10 @@ RoomCreate
 Room Message
 ```JSON
 {
-  "event_name": "room.join",
+  "event_name": "room.chat",
   "payload": {
-    "room_uuid": "bbbb719f-c9fe-11f0-8756-becea4e51719",
-    "room_password": null
+    "room_uuid": "cd0f34b1-ca95-11f0-91f1-ca3eeb8c5813",
+    "message" : "ratchet, hello world!"
   }
 }
 ```

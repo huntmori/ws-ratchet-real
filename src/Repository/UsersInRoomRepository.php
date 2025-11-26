@@ -129,4 +129,15 @@ class UsersInRoomRepository extends BaseRepository
             ]
         );
     }
+
+    public function countByRoomUuid(?string $roomUuid): int
+    {
+        return $this->medoo->count(
+            'users_in_room',
+            [
+                'room_uuid' => $roomUuid,
+                'state' => InRoomStatus::JOIN->value
+            ]
+        ) ?: 0;
+    }
 }

@@ -46,5 +46,4 @@ class RoomCreatePayload implements BasePayload
     #[FromArrayKey(key: 'join_password', required: false)]
     #[ToArrayKey(key: 'join_password', exclude: true)]
     public ?string $joinPassword = null;
-
 }
