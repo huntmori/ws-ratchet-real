@@ -1,6 +1,18 @@
 <?php
 namespace App\Trait;
 
+/**
+ * EnumUtils Trait
+ *
+ * Enum에 유용한 헬퍼 메서드들을 제공하는 트레이트
+ *
+ * 주요 기능:
+ * - 값/이름으로 Enum 찾기 (tryFromValue, fromValue, tryFromName, fromName)
+ * - 모든 값/이름 추출 (values, names)
+ * - 배열 변환 (toArray, toArrayFlipped)
+ * - 존재 여부 확인 (hasValue, hasName)
+ * - 유틸리티 메서드 (random, count)
+ */
 trait EnumUtils
 {
     /**

@@ -6,6 +6,7 @@ use App\Controller\ChatController;
 use App\Controller\RequestHandlerInterface;
 use App\Enum\ChatType;
 use App\Exception\ApiException;
+use App\Handler\PredisHandler;
 use App\Model\RoomMessage;
 use App\Repository\RoomMessageRepository;
 use App\Repository\RoomRepository;
@@ -25,7 +26,8 @@ readonly class RoomChatHandler implements RequestHandlerInterface
         private UserRepository        $userRepository,
         private RoomRepository        $roomRepository,
         private RoomMessageRepository $roomMessageRepository,
-        private UsersInRoomRepository $usersInRoomRepository
+        private UsersInRoomRepository $usersInRoomRepository,
+        private PredisHandler $predisHandler
     ) {}
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
@@ -35,13 +37,10 @@ readonly class RoomChatHandler implements RequestHandlerInterface
 
         $roomUuid = $baseRequest->payload->roomUuid();
         $roomSessionKey = RoomUserPair::getSessionKeyByUuid($roomUuid);
-        $userConnectionId = spl_object_id($from);
 
-        $userUuid = $chatController->connections[$userConnectionId]->profile->uuid() ?? null;
-        if ($userUuid === null) {
-            $this->logger->warning('User UUID is null. Cannot send chat message.');
-            throw new ApiException('User UUID is null. Cannot send chat message.');
-        }
+        $connectionId = spl_object_id($from);
+        $userUuid = $this->predisHandler->getUserUuidByConnectionId($connectionId);
+        $this->logger->debug('user uuid', [$userUuid]);
 
         // room uuid 가 유효한지 확인
         $exist = $this->roomRepository->existByUuid($roomUuid);
@@ -53,7 +52,7 @@ readonly class RoomChatHandler implements RequestHandlerInterface
         // user uuid가 유효한지 확인
         $existUser = $this->userRepository->existsByUuid($userUuid);
         if(!$existUser) {
-            $this->logger->warning('User does not exist. Cannot send chat message.');
+            $this->logger->warning("User[$userUuid] does not exist. Cannot send chat message.");
             throw new ApiException('User does not exist. Cannot send chat message.');
         }
 
@@ -95,7 +94,8 @@ readonly class RoomChatHandler implements RequestHandlerInterface
         $this->logger->debug('target user uuids', [$targetUserUuids]);
         $filtered = [];
         foreach($chatController->connections as $connection) {
-            $connectionUserUuid = $connection->profile->uuid() ?? null;
+            $key = spl_object_id($connection->connection);
+            $connectionUserUuid = $this->predisHandler->getUserUuidByConnectionId($key);
             if($connectionUserUuid !== null && in_array($connectionUserUuid, $targetUserUuids, true)) {
                 $filtered[] = $connection;
             }

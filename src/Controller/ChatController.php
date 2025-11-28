@@ -8,32 +8,46 @@ use App\Controller\Room\RoomCreateHandler;
 use App\Controller\Room\RoomJoinHandler;
 use App\Controller\User\UserCreateHandler;
 use App\Controller\User\UserLoginHandler;
-use App\Model\Room;
-use App\Model\User;
-use App\Request\Room\RoomCreatePayload;
-use App\RoomUserPair;
+use App\Handler\PredisHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 
+/**
+ * ChatController 클래스
+ *
+ * WebSocket 메시지를 처리하는 메인 컨트롤러
+ * Ratchet의 MessageComponentInterface를 구현하여 WebSocket 이벤트를 처리합니다.
+ *
+ * 주요 기능:
+ * - 클라이언트 연결/종료 관리
+ * - 메시지 수신 및 라우팅
+ * - 연결된 사용자 관리
+ * - 에러 처리
+ */
 final class ChatController implements MessageComponentInterface
 {
-    /** @var array<int, ConnectionPair> $connections */
+    /** @var array<int, ConnectionPair> $connections 연결된 클라이언트 목록 */
     public array $connections = [];
 
-    /** @var array<string, User> */
-    public array $users = [];
+    ///** @var array<string, User> */
+    //public array $users = [];
 
-    private ?LoggerInterface $logger = null;
-
-    private ?RequestDispatcher $dispatcher = null;
-    private ?ContainerInterface $container = null;
-    public function __construct(ContainerInterface $c, LoggerInterface $logger, RequestDispatcher $dispatcher)
-    {
+    private ?LoggerInterface $logger = null;        // 로거
+    private ?RequestDispatcher $dispatcher = null;  // 요청 디스패처
+    private ?ContainerInterface $container = null;  // DI 컨테이너
+    private ?PredisHandler $redisHandler = null;    // Redis 핸들러
+    public function __construct(
+        ContainerInterface $c,
+        LoggerInterface $logger,
+        RequestDispatcher $dispatcher,
+        PredisHandler $redisHandler
+    ) {
         $this->logger = $logger;
         $this->container = $c;
         $this->dispatcher = $dispatcher;
+        $this->redisHandler = $redisHandler;
     }
 
     function onOpen(ConnectionInterface $conn): void

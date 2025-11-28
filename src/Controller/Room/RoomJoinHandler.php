@@ -5,17 +5,16 @@ namespace App\Controller\Room;
 use App\Controller\ChatController;
 use App\Controller\RequestHandlerInterface;
 use App\Enum\InRoomStatus;
+use App\Enum\JoinType;
 use App\Exception\ApiException;
+use App\Handler\PredisHandler;
 use App\Model\UsersInRoom;
 use App\Repository\RoomRepository;
 use App\Repository\UserRepository;
 use App\Repository\UsersInRoomRepository;
-use App\Request\BasePayload;
 use App\Request\BaseRequest;
 use App\Request\Room\RoomJoinPayload;
 use App\Response\BaseResponse;
-use App\RoomUserPair;
-use http\Message;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 
@@ -25,6 +24,7 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
         private RoomRepository $roomRepository,
         private UsersInRoomRepository $usersInRoomRepository,
         private UserRepository $userRepository,
+        private PredisHandler $redis,
         private LoggerInterface $logger
     ) {
     }
@@ -42,8 +42,10 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
         // select room
         $room = $this->roomRepository->getOneByUuid($base->payload->roomUuid());
         // password check
-        if($room->joinPassword() !== $base->payload->roomPassword())
-        {
+        if(
+            $room->joinPassword() !== $base->payload->roomPassword()
+            && $room->joinType === JoinType::PASSWORD
+        ) {
             throw new ApiException(
                 message: 'password not matched',
                 code: -1
@@ -51,17 +53,14 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
         }
 
         $key = spl_object_id($from);
-        $userPair = $chatController->connections[$key];
-        $user = $userPair->profile;
+        $userUuid = $this->redis->getUserUuidByConnectionId($key);
 
-        if($user === null)
-        {
-            throw new ApiException(
-                message: 'please login first',
-                code: -1
-            );
+        if($userUuid === null) {
+            throw new ApiException(message: 'please login first',code:-1);
         }
-        // TODO: exist check
+        $user = $this->userRepository->getOneByUuid($userUuid);
+
+        // Check if user already joined the room
         $alreadyJoined = $this->usersInRoomRepository->hasByRoomUuidAndUserUuid($room->uuid(), $user->uuid());
         $this->logger->info('already joined ? : ', [$alreadyJoined]);
         if($alreadyJoined) {
@@ -87,8 +86,7 @@ final readonly class RoomJoinHandler implements RequestHandlerInterface
             ->build();
         $inRoom = $this->usersInRoomRepository->save($inRoom);
 
-        if(!$inRoom)
-        {
+        if(!$inRoom) {
             throw new ApiException(
                 message: 'error while joining',
                 code: -1

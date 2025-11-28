@@ -13,6 +13,17 @@ use ReflectionProperty;
 use ReflectionNamedType;
 use UnitEnum;
 
+/**
+ * ArraySerializable Trait
+ *
+ * 객체와 배열/JSON 간의 직렬화/역직렬화를 제공하는 트레이트
+ *
+ * 주요 기능:
+ * - JSON/배열에서 객체로 변환 (fromJson, fromJsonArray)
+ * - 객체를 배열/JSON으로 변환 (toArray, toJson)
+ * - Attribute 기반 키 매핑 (FromArrayKey, ToArrayKey, ArrayKeyIgnore)
+ * - 다양한 타입 자동 변환 (Enum, DateTime, 중첩 객체 등)
+ */
 trait ArraySerializable
 {
     /**

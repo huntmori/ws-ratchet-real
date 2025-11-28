@@ -14,22 +14,14 @@ final class PredisHandler
     public const int NO_EXPIRE_TIME = -1;
 
 
-    private Client $client;
-    private ?LoggerInterface $logger;
-
     /**
      * @param Client $client Predis 클라이언트 인스턴스
      * @param LoggerInterface|null $logger 로거 인스턴스
      */
-    public function __construct(Client $client, ?LoggerInterface $logger = null)
-    {
-        $this->client = $client;
-        $this->logger = $logger;
-
-        if ($this->logger) {
-            $this->logger->info('PredisHandler 초기화 완료');
-        }
-    }
+    public function __construct(
+        private readonly Client $client,
+        private readonly LoggerInterface $logger
+    ) {}
 
     /**
      * Redis 키의 값을 가져옵니다
@@ -39,8 +31,14 @@ final class PredisHandler
      */
     public function get(string $key): ?string
     {
+        if ($this->logger) {
+            $this->logger->info('Redis GET', ['key' => $key]);
+        }
         try {
             $value = $this->client->get($key);
+            if ($this->logger) {
+                $this->logger->info("Redis GET {$key} => {$value}");
+            }
             return $value !== null ? (string) $value : null;
         } catch (\Exception $e) {
             if ($this->logger) {
@@ -60,6 +58,9 @@ final class PredisHandler
      */
     public function set(string $key, mixed $value, ?int $ttl = null): bool
     {
+        if ($this->logger) {
+            $this->logger->info("redis set $key => $value ");
+        }
         try {
             if ($ttl !== null) {
                 $result = $this->client->setex($key, $ttl, $value);
@@ -240,8 +241,7 @@ final class PredisHandler
     {
         $this->set(
             "connection:$connectionId",
-            $userUuid,
-            self::NO_EXPIRE_TIME
+            $userUuid
         );
     }
 
@@ -249,18 +249,17 @@ final class PredisHandler
     {
         $this->set(
             "user:$userUuid",
-            $connectionId,
-            self::NO_EXPIRE_TIME
+            $connectionId
         );
     }
 
-    public function getConnectionIdByUserUuid(string $userUuid): ?string
+    public function getConnectionIdByUserUuid(string $userUuid): ?int
     {
-        return $this->get("user:$userUuid");
+        return (int)$this->get("user:$userUuid");
     }
 
-    public function getUserUuidByConnectionId(int $connectionId): int
+    public function getUserUuidByConnectionId(int $connectionId): ?string
     {
-        return (int)$this->get("connection:$connectionId");
+        return $this->get("connection:$connectionId");
     }
 }

@@ -6,6 +6,12 @@ use App\Model\Room;
 use Medoo\Medoo;
 use Psr\Log\LoggerInterface;
 
+/**
+ * RoomRepository 클래스
+ *
+ * 채팅방 데이터에 대한 데이터베이스 작업을 담당하는 Repository
+ * Room 모델의 CRUD 작업 및 채팅방 조회 기능을 제공합니다.
+ */
 class RoomRepository extends BaseRepository
 {
     public function __construct(Medoo $medoo, LoggerInterface $logger)

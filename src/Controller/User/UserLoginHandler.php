@@ -6,6 +6,7 @@ use App\ConnectionPair;
 use App\Controller\ChatController;
 use App\Controller\RequestHandlerInterface;
 use App\Exception\ApiException;
+use App\Handler\PredisHandler;
 use App\Repository\RoomRepository;
 use App\Repository\UserRepository;
 use App\Repository\UsersInRoomRepository;
@@ -13,6 +14,7 @@ use App\Request\BaseRequest;
 use App\Request\User\UserCreatePayload;
 use App\Request\User\UserLoginPayload;
 use App\RoomUserPair;
+use Monolog\Handler\RedisHandler;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 
@@ -20,11 +22,13 @@ final readonly class UserLoginHandler implements RequestHandlerInterface
 {
     public function __construct(
         private UserRepository  $repository,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private PredisHandler $redisHandler
     ) {}
 
     /**
      * @throws ApiException
+     * @throws \Exception
      */
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
@@ -63,10 +67,8 @@ final readonly class UserLoginHandler implements RequestHandlerInterface
 
         // 로그인 성공처리, 커넥션 설정
         $connectionId = spl_object_id($from);
-        $pair = new ConnectionPair($from,  $user);
-
-        $chatController->connections[$connectionId] = $pair;
-        $chatController->users[$user->uuid()] = $user;
+        $this->redisHandler->setConnectionIdToUserUuid($connectionId, $user->uuid());
+        $this->redisHandler->setUserUuidToConnectionId($user->uuid(), $connectionId);
 
         $from->send($user->toJson());
     }

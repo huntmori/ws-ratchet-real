@@ -36,14 +36,13 @@ final readonly class UserCreateHandler implements RequestHandlerInterface
      */
     public function handle(ConnectionInterface $from, $data, ChatController $chatController): void
     {
-        // TODO: Implement handle() method.
         // RequestDto 변환
         $decoded = $data;
         $baseRequest = BaseRequest::fromJson($data);
         $baseRequest->payload = UserCreatePayload::fromJson($decoded['payload']);
         $this->logger->info("Event [{$baseRequest->eventName}] 's payload : ", $baseRequest->payload->toArray());
 
-        // TODO:유효성 검사
+        // 아이디 중복 검사
         $exists = $this->repository->existsById($baseRequest->payload->id);
         if($exists) {
             throw new ApiException(

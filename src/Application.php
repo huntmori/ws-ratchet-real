@@ -15,17 +15,28 @@ use Ratchet\App;
 use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 
+/**
+ * Application 클래스
+ *
+ * WebSocket 채팅 서버의 메인 애플리케이션 클래스
+ * 서버 초기화, 의존성 설정, 서버 실행을 담당합니다.
+ *
+ * 주요 기능:
+ * - 환경 변수 로드
+ * - 로거 초기화
+ * - 데이터베이스 연결 설정
+ * - Redis 연결 설정
+ * - WebSocket 서버 구성 및 실행
+ */
 class Application
 {
-    public ?int $port = 8888;
-    public ?string $host = null;
+    public ?int $port = 8888;        // WebSocket 서버 포트
+    public ?string $host = null;     // 서버 호스트
 
-    protected ?LoopInterface $eventLoop = null;
-    protected ?ContainerInterface $container = null;
-
-    protected ?LoggerInterface $logger = null;
-
-    protected App $app;
+    protected ?LoopInterface $eventLoop = null;      // React 이벤트 루프
+    protected ?ContainerInterface $container = null;  // DI 컨테이너
+    protected ?LoggerInterface $logger = null;        // 로거
+    protected App $app;                               // Ratchet 앱 인스턴스
 
     public function __construct()
     {
@@ -163,9 +174,6 @@ class Application
 
             $logger->info("=================================================================================");
             $logger->info('connections : ', $this->container->get(ChatController::class)->connections);
-            $logger->info("=================================================================================");
-            $logger->info('users : ', $this->container->get(ChatController::class)->users);
-            $logger->info("=================================================================================");
         });
         $logger->info('Ratchet 서버 초기화', [
             'host' => $this->host,

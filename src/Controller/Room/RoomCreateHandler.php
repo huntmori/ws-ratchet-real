@@ -7,6 +7,7 @@ use App\Controller\ChatController;
 use App\Controller\RequestHandlerInterface;
 use App\Enum\InRoomStatus;
 use App\Exception\ApiException;
+use App\Handler\PredisHandler;
 use App\Model\Room;
 use App\Model\User;
 use App\Model\UsersInRoom;
@@ -26,7 +27,8 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
         private readonly RoomRepository $roomRepository,
         private readonly UserRepository $userRepository,
         private readonly UsersInRoomRepository $usersInRoomRepository,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly PredisHandler $redisHandler
     ) {
     }
 
@@ -43,17 +45,15 @@ readonly class RoomCreateHandler implements RequestHandlerInterface
         // 로그인 체크
         $key = spl_object_id($from);
 
-        /** @var ConnectionPair $connectionPair */
-        $connectionPair = $chatController->connections[$key];
-        if($connectionPair->profile === null) {
+        $userUuid = $this->redisHandler->get($key);
+        if($userUuid === null) {
             throw new ApiException(
                 message: 'please login first',
                 code: -1
             );
         }
 
-        /** @var ?User $owner */
-        $owner = $connectionPair->profile;
+        $owner = $this->userRepository->getOneByUuid($userUuid);
 
         // room create
         $room = Room::builder()

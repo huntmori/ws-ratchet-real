@@ -7,6 +7,12 @@ use Medoo\Medoo;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * UserRepository 클래스
+ *
+ * 사용자 데이터에 대한 데이터베이스 작업을 담당하는 Repository
+ * User 모델의 CRUD 작업 및 사용자 조회 기능을 제공합니다.
+ */
 class UserRepository extends BaseRepository
 {
     public function __construct(Medoo $medoo, LoggerInterface $logger)
@@ -99,5 +105,18 @@ class UserRepository extends BaseRepository
     public function existsByUuid(string $userUuid): bool
     {
         return $this->medoo->has('user', ['uuid' => $userUuid]);
+    }
+
+    public function getOneByUuid(string $userUuid): User
+    {
+        $row = $this->medoo->get(
+            'user',
+            '*',
+            [
+                'uuid' => $userUuid
+            ]
+        );
+
+        return User::fromJson($row);
     }
 }

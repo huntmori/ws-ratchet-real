@@ -9,6 +9,12 @@ use App\Model\UsersInRoom;
 use Medoo\Medoo;
 use Psr\Log\LoggerInterface;
 
+/**
+ * UsersInRoomRepository 클래스
+ *
+ * 사용자-채팅방 관계 데이터에 대한 데이터베이스 작업을 담당하는 Repository
+ * UsersInRoom 모델의 CRUD 작업 및 사용자 참여 상태 관리 기능을 제공합니다.
+ */
 class UsersInRoomRepository extends BaseRepository
 {
     public function __construct(Medoo $medoo, LoggerInterface $logger)

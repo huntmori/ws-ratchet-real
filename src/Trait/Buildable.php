@@ -2,6 +2,24 @@
 
 namespace App\Trait;
 
+/**
+ * Buildable Trait
+ *
+ * 빌더 패턴을 지원하는 트레이트
+ *
+ * 사용 예시:
+ * <code>
+ * $user = User::builder()
+ *     ->name('홍길동')
+ *     ->email('hong@example.com')
+ *     ->build();
+ * </code>
+ *
+ * 주요 기능:
+ * - 메서드 체이닝을 통한 객체 생성
+ * - 매직 메서드(__call)를 통한 동적 setter/getter
+ * - 유연한 객체 생성 패턴 제공
+ */
 trait Buildable
 {
     /**
